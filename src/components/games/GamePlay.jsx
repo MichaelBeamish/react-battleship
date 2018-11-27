@@ -9,10 +9,30 @@ import { compose } from "redux";
 import { finalizePlayerGrid } from "../../store/actions/gameActions";
 
 class GamePlay extends Component {
-  state = {};
+  state = {
+    propsLoaded: false,
+    updated: false
+  };
+
+  componentDidUpdate() {
+    if (this.state.propsLoaded === true) {
+      if (this.state.updated === false) {
+        this.setState({
+          updated: true
+        });
+      }
+    }
+  }
 
   render() {
     const { auth, game, gameID, thisPlayer } = this.props;
+    if (game !== null && thisPlayer !== null) {
+      if (this.state.propsLoaded === false) {
+        this.setState({
+          propsLoaded: true
+        });
+      }
+    }
 
     //AUTHENTICATION:
     if (!auth.uid) {
@@ -31,7 +51,7 @@ class GamePlay extends Component {
         return <Redirect to="/" />; //If user is not part of game redirect.
       }
     }
-    if (game && thisPlayer) {
+    if (this.state.updated === true) {
       if (thisPlayer.setUpBoard === false) {
         return <Redirect to={"/setup/" + gameID} />;
       }
@@ -89,44 +109,36 @@ class GamePlay extends Component {
 
     //CREATE SHIPS:
     let completedShips = [];
-    if (grid.length === 10 && thisPlayer) {
-      if (thisPlayer.ships.length === 5) {
-        completedShips = [];
+    if (this.state.updated === true) {
+      completedShips = [];
 
-        let finalBlock = document.getElementById("J10");
-        console.log(finalBlock);
-        if (finalBlock !== null) {
-          thisPlayer.ships.forEach(ship => {
-            if (ship.location !== null) {
-              let element = document.getElementById(ship.location);
-              let windowInfo = element.getBoundingClientRect();
-              let scrollLeft =
-                window.pageXOffset || document.documentElement.scrollLeft;
-              let scrollTop =
-                window.pageYOffset || document.documentElement.scrollTop;
-              let top = windowInfo.top + scrollTop;
-              let left = windowInfo.left + scrollLeft;
+      thisPlayer.ships.forEach(ship => {
+        let element = document.getElementById(ship.location);
+        let windowInfo = element.getBoundingClientRect();
+        let scrollLeft =
+          window.pageXOffset || document.documentElement.scrollLeft;
+        let scrollTop =
+          window.pageYOffset || document.documentElement.scrollTop;
+        let top = windowInfo.top + scrollTop;
+        let left = windowInfo.left + scrollLeft;
 
-              let dynamicStyle = {
-                position: "absolute",
-                left: left + "px",
-                top: top + "px"
-              };
-              let orientation = ship.orientation;
-              let acronym = ship.acronym;
-              let name = ship.name;
-              let color = ship.color;
-              completedShips.push({
-                color,
-                acronym,
-                name,
-                dynamicStyle,
-                orientation
-              });
-            }
-          });
-        }
-      }
+        let dynamicStyle = {
+          position: "absolute",
+          left: left + "px",
+          top: top + "px"
+        };
+        let orientation = ship.orientation;
+        let acronym = ship.acronym;
+        let name = ship.name;
+        let color = ship.color;
+        completedShips.push({
+          color,
+          acronym,
+          name,
+          dynamicStyle,
+          orientation
+        });
+      });
     }
 
     let shipList = null;

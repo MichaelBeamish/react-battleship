@@ -10,6 +10,8 @@ import { finalizePlayerGrid } from "../../store/actions/gameActions";
 
 class PlayerSetup extends Component {
   state = {
+    propsLoaded: false,
+    updated: false,
     haveAllShipsBeenPlaced: false,
     messageToUser: "",
     allOccupiedBlocks: [],
@@ -171,7 +173,6 @@ class PlayerSetup extends Component {
       }
 
       //COMPARE REQUIRED TO CURRENT:
-
       //First remove all current ships existing blocks from used block list.
       let thisShipCurrentState = this.state[shipAcronym].occupiedBlocks;
       let currentStateAllUsedBlocks = this.state.allOccupiedBlocks;
@@ -231,8 +232,25 @@ class PlayerSetup extends Component {
     }
   };
 
+  componentDidUpdate() {
+    if (this.state.propsLoaded === true) {
+      if (this.state.updated === false) {
+        this.setState({
+          updated: true
+        });
+      }
+    }
+  }
+
   render() {
     const { auth, game, gameID, thisPlayer } = this.props;
+    if (game !== null && thisPlayer !== null) {
+      if (this.state.propsLoaded === false) {
+        this.setState({
+          propsLoaded: true
+        });
+      }
+    }
 
     //AUTHENTICATION:
     if (!auth.uid) {
@@ -251,7 +269,7 @@ class PlayerSetup extends Component {
         return <Redirect to="/" />; //If user is not part of game redirect.
       }
     }
-    if (game && thisPlayer) {
+    if (this.state.updated === true) {
       if (thisPlayer.setUpBoard === true) {
         return <Redirect to={"/game/" + gameID} />;
       }
@@ -285,30 +303,26 @@ class PlayerSetup extends Component {
       );
     });
 
-    //RETURN POSITION OF GIVEN ELEMENT:
-    function offset(el) {
-      var rect = el.getBoundingClientRect(),
-        scrollLeft = window.pageXOffset || document.documentElement.scrollLeft,
-        scrollTop = window.pageYOffset || document.documentElement.scrollTop;
-      return { top: rect.top + scrollTop, left: rect.left + scrollLeft };
-    }
-
     //CREATE SHIPS
     let allShips = ["AC", "BS", "SM", "DS", "CR"];
-    let completedShips = {};
+    let completedShips = [];
 
-    if (grid.length === 10) {
-      completedShips = [];
-
+    if (this.state.updated === true) {
       allShips.forEach(ship => {
         if (this.state[ship].location !== null) {
-          let position = offset(
-            document.getElementById(this.state[ship].location)
-          );
+          let element = document.getElementById(this.state[ship].location);
+          let windowInfo = element.getBoundingClientRect();
+          let scrollLeft =
+            window.pageXOffset || document.documentElement.scrollLeft;
+          let scrollTop =
+            window.pageYOffset || document.documentElement.scrollTop;
+          let top = windowInfo.top + scrollTop;
+          let left = windowInfo.left + scrollLeft;
+
           let dynamicStyle = {
             position: "absolute",
-            left: position.left + "px",
-            top: position.top + "px"
+            left: left + "px",
+            top: top + "px"
           };
           let orientation = this.state[ship].orientation;
           let acronym = ship;
