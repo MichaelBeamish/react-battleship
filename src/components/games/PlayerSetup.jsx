@@ -7,6 +7,7 @@ import { compose } from "redux";
 
 class PlayerSetup extends Component {
   state = {
+    occupiedBlocks: [],
     shipClicked: "AC",
     orientation: "horizontal",
     AC: {
@@ -53,16 +54,41 @@ class PlayerSetup extends Component {
   };
   blockClicked = e => {
     if (this.state.shipClicked !== null) {
+      let blockClicked = e.target.id;
+      let blockClickedLetter = blockClicked[0].toLowerCase();
+      blockClickedLetter = blockClickedLetter.charCodeAt(0) - 96;
+      let blockClickedNumber = Number(blockClicked[1]);
+      let orientation = this.state.orientation;
+      let shipAcronym = this.state.shipClicked;
       let shipName = this.state[this.state.shipClicked].name;
       let color = this.state[this.state.shipClicked].color;
-      this.setState({
-        [this.state.shipClicked]: {
-          location: e.target.id,
-          orientation: this.state.orientation,
-          name: shipName,
-          color: color
+
+      // LOGIC TO PREVENT OVERLAP:
+      let okToGo = false;
+      if (shipAcronym === "AC") {
+        if (orientation === "horizontal") {
+          if (blockClickedNumber < 7) {
+            okToGo = true;
+          }
+        } else {
+          if (blockClickedLetter < 7) {
+            okToGo = true;
+          }
         }
-      });
+      }
+
+      if (okToGo) {
+        this.setState({
+          [this.state.shipClicked]: {
+            location: e.target.id,
+            orientation: this.state.orientation,
+            name: shipName,
+            color: color
+          }
+        });
+      } else {
+        console.log("Can't place it there.");
+      }
     }
   };
 
