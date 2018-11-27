@@ -15,6 +15,7 @@ export const finalizePlayerGrid = (gameID, deliveredGame, player, ships) => {
     let game = JSON.parse(JSON.stringify(deliveredGame));
     let thisPlayerID = player.id;
     let allPlayers = game.players;
+    allPlayers[thisPlayerID].setUpBoard = true;
     allPlayers[thisPlayerID].ships = ships;
 
     const firestore = getFirestore();
@@ -45,7 +46,7 @@ export const generateGame = (receivedPlayers, gameName) => {
       id: 0,
       userReference: receivedPlayers[0],
       winner: false,
-      personalMessage: ["Started game."]
+      setUpBoard: false
     };
     players.push(player1);
 
@@ -53,7 +54,7 @@ export const generateGame = (receivedPlayers, gameName) => {
       id: 1,
       userReference: receivedPlayers[1],
       winner: false,
-      personalMessage: ["Started game."]
+      setUpBoard: false
     };
     players.push(player2);
 

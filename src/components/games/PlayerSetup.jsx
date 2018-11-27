@@ -19,6 +19,7 @@ class PlayerSetup extends Component {
       location: null,
       orientation: null,
       name: "aircraft carrier",
+      acronym: "AC",
       color: "red",
       occupiedBlocks: []
     },
@@ -26,6 +27,7 @@ class PlayerSetup extends Component {
       location: null,
       orientation: null,
       name: "battleship",
+      acronym: "BS",
       color: "orange",
       occupiedBlocks: []
     },
@@ -33,6 +35,7 @@ class PlayerSetup extends Component {
       location: null,
       orientation: null,
       name: "submarine",
+      acronym: "SM",
       color: "green",
       occupiedBlocks: []
     },
@@ -40,6 +43,7 @@ class PlayerSetup extends Component {
       location: null,
       orientation: null,
       name: "destroyer",
+      acronym: "DS",
       color: "purple",
       occupiedBlocks: []
     },
@@ -47,6 +51,7 @@ class PlayerSetup extends Component {
       location: null,
       orientation: null,
       name: "cruiser",
+      acronym: "CR",
       color: "blue",
       occupiedBlocks: []
     }
@@ -211,6 +216,7 @@ class PlayerSetup extends Component {
             location: e.target.id,
             orientation: this.state.orientation,
             name: shipName,
+            acronym: this.state[shipAcronym].acronym,
             color: this.state[shipAcronym].color,
             occupiedBlocks: requiredBlocks
           },
@@ -243,6 +249,11 @@ class PlayerSetup extends Component {
       if (userIsAuthorized === false) {
         console.log("Not a member of this game.");
         return <Redirect to="/" />; //If user is not part of game redirect.
+      }
+    }
+    if (game && thisPlayer) {
+      if (thisPlayer.setUpBoard === true) {
+        return <Redirect to={"/game/" + gameID} />;
       }
     }
 

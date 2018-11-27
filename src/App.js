@@ -14,6 +14,7 @@ import SignUp from "./components/auth/SignUp";
 import HostPrivateGame from "./components/dashboard/HostPrivateGame";
 import PlayerSetup from "./components/games/PlayerSetup";
 import CreatingGamePage from "./components/games/CreatingGamePage";
+import GamePlay from "./components/games/GamePlay";
 
 class App extends Component {
   render() {
@@ -28,6 +29,7 @@ class App extends Component {
             <Route path="/signin" component={SignIn} />
             <Route path="/signup" component={SignUp} />
             <Route path="/setup/:id" component={PlayerSetup} />
+            <Route path="/game/:id" component={GamePlay} />
             <Route path="/createGame/:id" component={CreatingGamePage} />
           </Switch>
         </div>

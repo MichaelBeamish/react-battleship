@@ -38,7 +38,7 @@ class Home extends Component {
             yourGames.map(game => {
               return (
                 <div key={game.id} className="game-bubble">
-                  <NavLink to={"/setup/" + game.id}>
+                  <NavLink to={"/game/" + game.id}>
                     <h5>{game.gameName.toUpperCase()}</h5>
                   </NavLink>
                   <p>Started {moment(game.createdAt.toDate()).calendar()}</p>
