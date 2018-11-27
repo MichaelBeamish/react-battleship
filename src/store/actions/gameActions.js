@@ -1,3 +1,5 @@
+export const FINALIZE_GAME = "FINALIZE_GAME";
+export const FINALIZE_GAME_ERROR = "FINALIZE_GAME_ERROR";
 export const GENERATE_GAME = "GENERATE_GAME";
 export const GENERATE_GAME_ERROR = "GENERATE_GAME_ERROR";
 export const CREATED_GAME_TO_NULL = "CREATED_GAME_TO_NULL";
@@ -5,6 +7,30 @@ export const CREATED_GAME_TO_NULL = "CREATED_GAME_TO_NULL";
 export const createdToNull = () => {
   return {
     type: CREATED_GAME_TO_NULL
+  };
+};
+
+export const finalizePlayerGrid = (gameID, deliveredGame, player, ships) => {
+  return (dispatch, getState, { getFirebase, getFirestore }) => {
+    let game = JSON.parse(JSON.stringify(deliveredGame));
+    let thisPlayerID = player.id;
+    let allPlayers = game.players;
+    allPlayers[thisPlayerID].ships = ships;
+
+    const firestore = getFirestore();
+    firestore
+      .collection("games")
+      .doc(gameID)
+      .update({
+        players: allPlayers
+      })
+      .then(() => {
+        //Then resumes the dispatch.
+        dispatch({ type: FINALIZE_GAME, payload: gameID });
+      })
+      .catch(err => {
+        dispatch({ type: FINALIZE_GAME_ERROR, payload: err });
+      });
   };
 };
 

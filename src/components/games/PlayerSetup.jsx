@@ -5,8 +5,12 @@ import { connect } from "react-redux"; //Connects redux store to component.
 import { firestoreConnect } from "react-redux-firebase"; //Connects firestore to redux store.
 import { compose } from "redux";
 
+// ACTIONS:
+import { finalizePlayerGrid } from "../../store/actions/gameActions";
+
 class PlayerSetup extends Component {
   state = {
+    haveAllShipsBeenPlaced: false,
     messageToUser: "",
     allOccupiedBlocks: [],
     shipClicked: "AC",
@@ -62,6 +66,15 @@ class PlayerSetup extends Component {
     this.setState({
       orientation: "horizontal"
     });
+  };
+  handleFinalize = (gameID, game, player, ships) => {
+    if (this.state.haveAllShipsBeenPlaced) {
+      this.props.finalizePlayerGrid(gameID, game, player, ships);
+    } else {
+      this.setState({
+        messageToUser: "You need to place all of the ships to continue."
+      });
+    }
   };
   blockClicked = e => {
     if (this.state.shipClicked !== null) {
@@ -187,6 +200,12 @@ class PlayerSetup extends Component {
 
       //IF EVERYTHING IS OK CHANGE THE STATE:
       if (okToGo) {
+        if (newAllUsedBlocks.length === 17) {
+          this.setState({
+            haveAllShipsBeenPlaced: true
+          });
+        }
+
         this.setState({
           [shipAcronym]: {
             location: e.target.id,
@@ -207,7 +226,7 @@ class PlayerSetup extends Component {
   };
 
   render() {
-    const { auth, game } = this.props;
+    const { auth, game, gameID, thisPlayer } = this.props;
 
     //AUTHENTICATION:
     if (!auth.uid) {
@@ -377,6 +396,29 @@ class PlayerSetup extends Component {
                 </div>
               ) : null}
             </div>
+            {this.state.haveAllShipsBeenPlaced ? (
+              <button
+                onClick={() =>
+                  this.handleFinalize(gameID, game, thisPlayer, [
+                    this.state.AC,
+                    this.state.BS,
+                    this.state.SM,
+                    this.state.DS,
+                    this.state.CR
+                  ])
+                }
+                className="btn submit-button yellow darken-2 black-text"
+              >
+                Finalize
+              </button>
+            ) : (
+              <button
+                onClick={() => this.handleFinalize()}
+                className="btn grey"
+              >
+                Finalize
+              </button>
+            )}
             {shipList}
           </div>
           <div className="col l8 center blue height-100">
@@ -432,6 +474,9 @@ const mapStateToProps = (state, ownProps) => {
 };
 
 export default compose(
-  connect(mapStateToProps),
+  connect(
+    mapStateToProps,
+    { finalizePlayerGrid }
+  ),
   firestoreConnect([{ collection: "users" }, { collection: "games" }])
 )(PlayerSetup);

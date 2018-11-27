@@ -1,7 +1,9 @@
 import {
   GENERATE_GAME,
   GENERATE_GAME_ERROR,
-  CREATED_GAME_TO_NULL
+  CREATED_GAME_TO_NULL,
+  FINALIZE_GAME,
+  FINALIZE_GAME_ERROR
 } from "../actions/gameActions";
 
 const initState = { gameCreatedID: null };
@@ -17,6 +19,12 @@ const gameReducer = (state = initState, action) => {
     case CREATED_GAME_TO_NULL:
       console.log("reverted game ID to null in redux state");
       return { gameCreatedID: null };
+    case FINALIZE_GAME:
+      console.log("finalized game", action.payload);
+      return state;
+    case FINALIZE_GAME_ERROR:
+      console.log("error finalizing game", action.payload);
+      return state;
     default:
       return state;
   }

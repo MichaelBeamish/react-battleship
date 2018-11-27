@@ -130,6 +130,9 @@ nav {
   display: inline-block;
   margin: 4px;
 }
+.submit-button {
+  font-weight: 500;
+}
 
 .width-100 {
   width: 100%;
