@@ -35,7 +35,8 @@ nav {
 }
 
 .full-height {
-  height: 100vh;
+  height: 93.65vh;
+  overflow: hidden;
 }
 
 .block {
@@ -46,13 +47,15 @@ nav {
   border: 1px;
   border-style: solid;
   display: flex;
-  justify-content: center;
-  align-items: center;
+  justify-content: left;
+  align-items: top;
+}
+.block-text {
+  padding-left: 2px;
+  pointer-events: none;
 }
 
 .ship {
-  margin-left: 1em;
-  margin-top: 1em;
   border: 2px;
   border-style: solid;
   border-radius: 5px;
@@ -60,46 +63,48 @@ nav {
   justify-content: center;
   align-items: center;
   font-weight: 450;
+  pointer-events: none;
+  opacity: 0.65;
 }
 .AChorizontal {
-  width: 23.4em;
-  height: 3em;
+  width: 25.55em;
+  height: 5em;
 }
 .ACvertical {
-  height: 23.4em;
-  width: 3em;
+  height: 25.55em;
+  width: 5em;
 }
 .BShorizontal {
-  width: 18.4em;
-  height: 3em;
+  width: 20.5em;
+  height: 5em;
 }
 .BSvertical {
-  height: 18.4em;
-  width: 3em;
+  height: 20.5em;
+  width: 5em;
 }
 .SMhorizontal {
-  width: 13.4em;
-  height: 3em;
+  width: 15.35em;
+  height: 5em;
 }
 .SMvertical {
-  height: 13.4em;
-  width: 3em;
+  height: 15.35em;
+  width: 5em;
 }
 .DShorizontal {
-  width: 13.4em;
-  height: 3em;
+  width: 15.35em;
+  height: 5em;
 }
 .DSvertical {
-  height: 13.4em;
-  width: 3em;
+  height: 15.35em;
+  width: 5em;
 }
 .CRhorizontal {
-  width: 8.4em;
-  height: 3em;
+  width: 10.15em;
+  height: 5em;
 }
 .CRvertical {
-  height: 8.4em;
-  width: 3em;
+  height: 10.15em;
+  width: 5em;
 }
 .hbtnhorizontal {
   background-color: black !important;
@@ -111,6 +116,13 @@ nav {
   width: 50%;
   display: inline-block;
   margin: 4px;
+}
+
+.clicked-ship {
+  background-color: black;
+  padding: 2px;
+  margin: 0.5em;
+  border-radius: 2px;
 }
 
 .orient-btn {
@@ -142,4 +154,13 @@ nav {
 
 .no-wrap {
   white-space: nowrap;
+}
+
+.messages-display {
+  background-color: black;
+  border-radius: 10px;
+  padding: 2px;
+  border: 2px;
+  border-style: solid;
+  border-color: gold;
 }
