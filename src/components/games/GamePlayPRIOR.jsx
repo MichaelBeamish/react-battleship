@@ -5,10 +5,6 @@ import { connect } from "react-redux"; //Connects redux store to component.
 import { firestoreConnect } from "react-redux-firebase"; //Connects firestore to redux store.
 import { compose } from "redux";
 
-//COMPONENTS:
-import Grid from "./Grid";
-import Ships from "./Ships";
-
 // ACTIONS:
 import { finalizePlayerGrid } from "../../store/actions/gameActions";
 
@@ -18,8 +14,8 @@ class GamePlay extends Component {
     updated: false
   };
 
-  blockClicked = numLetter => {
-    let guess = numLetter;
+  handleGuess = e => {
+    let guess = e.target.id;
     let thisID = this.props.thisPlayer.id;
     let turn = this.props.game.whosTurn;
     let otherPlayer = this.props.otherPlayer;
@@ -28,7 +24,7 @@ class GamePlay extends Component {
       let hit = false;
       otherPlayer.ships.forEach(ship => {
         ship.occupiedBlocks.forEach(block => {
-          if (block === guess) {
+          if ("other" + block === guess) {
             hit = true;
           }
         });
@@ -63,14 +59,7 @@ class GamePlay extends Component {
   }
 
   render() {
-    const {
-      auth,
-      game,
-      gameID,
-      thisPlayer,
-      otherPlayer,
-      shipsFormated
-    } = this.props;
+    const { auth, game, gameID, thisPlayer, otherPlayer } = this.props;
     if (game !== null && thisPlayer !== null && otherPlayer !== null) {
       if (this.state.propsLoaded === false) {
         this.setState({
@@ -95,9 +84,110 @@ class GamePlay extends Component {
         console.log("Not a member of this game.");
         return <Redirect to="/" />; //If user is not part of game redirect.
       }
+    }
+    if (this.state.updated === true) {
       if (thisPlayer.setUpBoard === false) {
         return <Redirect to={"/setup/" + gameID} />;
       }
+    }
+
+    //CREATE YOUR GRID:
+    let grid = [];
+    let row = [];
+    let letters = ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J"];
+    letters.forEach(letter => {
+      row = [];
+      for (let i = 1; i <= 10; i++) {
+        row.push(
+          <div id={letter + i} key={letter + i} className="block">
+            <small className="block-text">
+              {letter}
+              {i}
+            </small>
+          </div>
+        );
+      }
+      grid.push(
+        <div key={"row" + letter} className="grid-row">
+          {row}
+        </div>
+      );
+    });
+    //CREATE OTHER GRID:
+    let grid2 = [];
+    let row2 = [];
+    let letters2 = ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J"];
+    letters2.forEach(letter => {
+      row2 = [];
+      for (let i = 1; i <= 10; i++) {
+        row2.push(
+          <div
+            id={"other" + letter + i}
+            onClick={this.handleGuess}
+            key={letter + i}
+            className="block"
+          >
+            <small className="block-text">
+              {letter}
+              {i}
+            </small>
+          </div>
+        );
+      }
+      grid2.push(
+        <div key={"row" + letter} className="grid-row">
+          {row2}
+        </div>
+      );
+    });
+
+    //CREATE SHIPS:
+    let completedShips = [];
+    if (this.state.updated === true) {
+      completedShips = [];
+
+      thisPlayer.ships.forEach(ship => {
+        let element = document.getElementById(ship.location);
+        let windowInfo = element.getBoundingClientRect();
+        let scrollLeft =
+          window.pageXOffset || document.documentElement.scrollLeft;
+        let scrollTop =
+          window.pageYOffset || document.documentElement.scrollTop;
+        let top = windowInfo.top + scrollTop;
+        let left = windowInfo.left + scrollLeft;
+
+        let dynamicStyle = {
+          position: "absolute",
+          left: left + "px",
+          top: top + "px"
+        };
+        let orientation = ship.orientation;
+        let acronym = ship.acronym;
+        let name = ship.name;
+        let color = ship.color;
+        completedShips.push({
+          color,
+          acronym,
+          name,
+          dynamicStyle,
+          orientation
+        });
+      });
+    }
+
+    let shipList = null;
+    if (completedShips.length === 5) {
+      shipList = completedShips.map(ship => (
+        <div
+          key={ship.location + ship.name}
+          className={`ship ${ship.acronym + ship.orientation} ${ship.color}`}
+          style={ship.dynamicStyle}
+        >
+          <p className={`no-wrap ${ship.orientation}`}>
+            {ship.name.toUpperCase()}
+          </p>
+        </div>
+      ));
     }
 
     return (
@@ -115,19 +205,14 @@ class GamePlay extends Component {
           <div className="col l5 center height-100 grey darken-2">
             <div className="center">
               <h3>Your Board</h3>
-              <Grid typeOfGrid={"gamePlay"} blockClicked={null} />
-              {this.state.updated === true ? (
-                <Ships allShips={shipsFormated} />
-              ) : null}
+              {grid}
+              {shipList}
             </div>
           </div>
           <div className="col l5 center height-100 blue">
             <div className="center">
               <h3>Other Board</h3>
-              <Grid
-                typeOfGrid={"otherPlayer"}
-                blockClicked={this.blockClicked}
-              />
+              {grid2}
             </div>
           </div>
         </div>
@@ -157,18 +242,8 @@ const mapStateToProps = (state, ownProps) => {
     : null;
 
   let thisPlayerInfo = null;
-  let shipsFormated = null;
   if (users !== undefined && thisPlayer !== null) {
     thisPlayerInfo = users.find(user => user.id === thisPlayer.userReference);
-    if (thisPlayer.ships) {
-      shipsFormated = {
-        AC: thisPlayer.ships[0],
-        BS: thisPlayer.ships[1],
-        SM: thisPlayer.ships[2],
-        DS: thisPlayer.ships[3],
-        CR: thisPlayer.ships[4]
-      };
-    }
   }
 
   let otherPlayerInfo = null;
@@ -183,7 +258,6 @@ const mapStateToProps = (state, ownProps) => {
     users: users,
     thisPlayer: thisPlayer,
     thisPlayerInfo: thisPlayerInfo,
-    shipsFormated: shipsFormated,
     otherPlayer: otherPlayer,
     otherPlayerInfo: otherPlayerInfo
   };

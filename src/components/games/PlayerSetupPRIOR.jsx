@@ -5,16 +5,13 @@ import { connect } from "react-redux"; //Connects redux store to component.
 import { firestoreConnect } from "react-redux-firebase"; //Connects firestore to redux store.
 import { compose } from "redux";
 
-//COMPONENTS:
-import Grid from "./Grid";
-import Ships from "./Ships";
-import ShipsButtons from "./ShipsButtons";
-
 // ACTIONS:
 import { finalizePlayerGrid } from "../../store/actions/gameActions";
 
 class PlayerSetup extends Component {
   state = {
+    propsLoaded: false,
+    updated: false,
     haveAllShipsBeenPlaced: false,
     messageToUser: "",
     allOccupiedBlocks: [],
@@ -62,9 +59,9 @@ class PlayerSetup extends Component {
     }
   };
 
-  handleShipClick = ship => {
+  handleShipClick = e => {
     this.setState({
-      shipClicked: ship
+      shipClicked: e.target.id
     });
   };
   verticalClicked = () => {
@@ -86,10 +83,10 @@ class PlayerSetup extends Component {
       });
     }
   };
-  blockClicked = numLetter => {
+  blockClicked = e => {
     if (this.state.shipClicked !== null) {
       let message = "";
-      let blockClicked = numLetter;
+      let blockClicked = e.target.id;
       let blockClickedLetter = blockClicked[0].toLowerCase();
       blockClickedLetter = blockClickedLetter.charCodeAt(0) - 96;
       let blockClickedNumber = blockClicked[1];
@@ -217,7 +214,7 @@ class PlayerSetup extends Component {
 
         this.setState({
           [shipAcronym]: {
-            location: numLetter,
+            location: e.target.id,
             orientation: this.state.orientation,
             name: shipName,
             acronym: this.state[shipAcronym].acronym,
@@ -235,8 +232,25 @@ class PlayerSetup extends Component {
     }
   };
 
+  componentDidUpdate() {
+    if (this.state.propsLoaded === true) {
+      if (this.state.updated === false) {
+        this.setState({
+          updated: true
+        });
+      }
+    }
+  }
+
   render() {
     const { auth, game, gameID, thisPlayer } = this.props;
+    if (game !== null && thisPlayer !== null) {
+      if (this.state.propsLoaded === false) {
+        this.setState({
+          propsLoaded: true
+        });
+      }
+    }
 
     //AUTHENTICATION:
     if (!auth.uid) {
@@ -254,10 +268,99 @@ class PlayerSetup extends Component {
         console.log("Not a member of this game.");
         return <Redirect to="/" />; //If user is not part of game redirect.
       }
+    }
+    if (this.state.updated === true) {
       if (thisPlayer.setUpBoard === true) {
         return <Redirect to={"/game/" + gameID} />;
       }
     }
+
+    //CREATE GRID:
+    let grid = [];
+    let row = [];
+    let letters = ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J"];
+    letters.forEach(letter => {
+      row = [];
+      for (let i = 1; i <= 10; i++) {
+        row.push(
+          <div
+            id={letter + i}
+            onClick={this.blockClicked}
+            key={letter + i}
+            className="block"
+          >
+            <small className="block-text">
+              {letter}
+              {i}
+            </small>
+          </div>
+        );
+      }
+      grid.push(
+        <div key={"row" + letter} className="grid-row">
+          {row}
+        </div>
+      );
+    });
+
+    //CREATE SHIPS
+    let allShips = ["AC", "BS", "SM", "DS", "CR"];
+    let completedShips = [];
+
+    if (this.state.updated === true) {
+      allShips.forEach(ship => {
+        if (this.state[ship].location !== null) {
+          let element = document.getElementById(this.state[ship].location);
+          let windowInfo = element.getBoundingClientRect();
+          let scrollLeft =
+            window.pageXOffset || document.documentElement.scrollLeft;
+          let scrollTop =
+            window.pageYOffset || document.documentElement.scrollTop;
+          let top = windowInfo.top + scrollTop;
+          let left = windowInfo.left + scrollLeft;
+
+          let dynamicStyle = {
+            position: "absolute",
+            left: left + "px",
+            top: top + "px"
+          };
+          let orientation = this.state[ship].orientation;
+          let acronym = ship;
+          let name = this.state[ship].name;
+          let color = this.state[ship].color;
+          completedShips.push({
+            color,
+            acronym,
+            name,
+            dynamicStyle,
+            orientation
+          });
+        }
+      });
+    }
+
+    let shipList = completedShips.map(ship => (
+      <div
+        key={ship.acronym}
+        className={`ship ${ship.acronym + ship.orientation} ${ship.color}`}
+        style={ship.dynamicStyle}
+      >
+        <p className={`no-wrap ${ship.orientation}`}>
+          {ship.name.toUpperCase()}
+        </p>
+      </div>
+    ));
+
+    let buttonList = allShips.map(ship => (
+      <button
+        id={ship}
+        key={ship}
+        onClick={this.handleShipClick}
+        className={`btn ship-buttons ${this.state[ship].color}`}
+      >
+        {this.state[ship].name.toUpperCase()}
+      </button>
+    ));
 
     return (
       <div className="full-height">
@@ -265,16 +368,7 @@ class PlayerSetup extends Component {
           <div className="col l4 center height-100 grey darken-2">
             <div className="ships center">
               <h3>Your Ships</h3>
-              <ShipsButtons
-                allShips={{
-                  [this.state.AC.acronym]: this.state.AC,
-                  [this.state.BS.acronym]: this.state.BS,
-                  [this.state.SM.acronym]: this.state.SM,
-                  [this.state.DS.acronym]: this.state.DS,
-                  [this.state.CR.acronym]: this.state.CR
-                }}
-                handleShipClick={this.handleShipClick}
-              />
+              {buttonList}
             </div>
             <div className="horizOrVert center">
               <button
@@ -350,19 +444,11 @@ class PlayerSetup extends Component {
                 Finalize
               </button>
             )}
-            <Ships
-              allShips={{
-                [this.state.AC.acronym]: this.state.AC,
-                [this.state.BS.acronym]: this.state.BS,
-                [this.state.SM.acronym]: this.state.SM,
-                [this.state.DS.acronym]: this.state.DS,
-                [this.state.CR.acronym]: this.state.CR
-              }}
-            />
+            {shipList}
           </div>
           <div className="col l8 center blue height-100">
             <h3>Set Up Your Board</h3>
-            <Grid typeOfGrid={"playerSetup"} blockClicked={this.blockClicked} />
+            {grid}
           </div>
         </div>
       </div>
