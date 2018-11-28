@@ -19,7 +19,7 @@ const CreatingGamePage = ({ gameID, game, gameInfo, createdToNull }) => {
     return <Redirect to={"/setup/" + gameID} />;
 
   return (
-    <div className="blue loading-game">
+    <div className="loading-game">
       <p>Loading game...</p>
     </div>
   );

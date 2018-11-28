@@ -70,49 +70,57 @@ class HostPrivateGame extends Component {
     //REDIRECT IF NOT LOGGED IN:
     if (!auth.uid) return <Redirect to="/splash" />; //If not logged in redirect.
     return (
-      <div className="container">
-        <h3 className="center">Host Private Game</h3>
-        <p className="red-text center">
-          <b>{notifications}</b>
-        </p>
-        <form onSubmit={this.handleSubmit}>
-          <div className="row">
-            <div className="col l10">
-              <div className="input-field">
-                <label htmlFor="gameName">name your game</label>
-                <input
-                  type="text"
-                  id="gameName"
-                  onChange={this.handleChange}
-                  required
-                />
-              </div>
-            </div>
-            <div className="col l2">
-              <div className="center">
+      <div className="most-height valign-wrapper">
+        <div className="container">
+          <h3 className="center">Create New Game</h3>
+          {notifications.length ? (
+            <p className="center">
+              <b className="create-game-message">{notifications}</b>
+            </p>
+          ) : null}
+          <form onSubmit={this.handleSubmit} className="bringForward">
+            <div className="row">
+              <div className="col l10">
                 <div className="input-field">
-                  <button className="btn blue">Begin Game</button>
+                  <label htmlFor="gameName">name your game</label>
+                  <input
+                    type="text"
+                    id="gameName"
+                    onChange={this.handleChange}
+                    required
+                  />
+                </div>
+              </div>
+              <div className="col l2">
+                <div className="center">
+                  <div className="input-field">
+                    <button className="btn blue">Begin Game</button>
+                  </div>
                 </div>
               </div>
             </div>
-          </div>
-        </form>
-        <div className="row">
-          <div className="col l6 m6 center green search-invite-containers">
-            <UsersInvited
-              users={users}
-              removePlayerFromGame={this.removePlayerFromGame}
-              playersAdded={this.state.players}
-              auth={auth}
-            />
-          </div>
+          </form>
+          <div className="row">
+            <div className="col l6 m6">
+              <div className="center current-players-container">
+                <UsersInvited
+                  users={users}
+                  removePlayerFromGame={this.removePlayerFromGame}
+                  playersAdded={this.state.players}
+                  auth={auth}
+                />
+              </div>
+            </div>
 
-          <div className="col l6 m6 center blue search-invite-containers">
-            <InviteUsers
-              users={users}
-              addPlayerToGame={this.addPlayerToGame}
-              players={this.state.players}
-            />
+            <div className="col l6 m6">
+              <div className="center search-invite-container">
+                <InviteUsers
+                  users={users}
+                  addPlayerToGame={this.addPlayerToGame}
+                  players={this.state.players}
+                />
+              </div>
+            </div>
           </div>
         </div>
       </div>

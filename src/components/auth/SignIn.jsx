@@ -22,34 +22,36 @@ class SignIn extends Component {
     const { authError, auth } = this.props;
     if (auth.uid) return <Redirect to="/" />; //If not logged in redirect to sign in route.
     return (
-      <div className="container">
-        <form onSubmit={this.handleSubmit} className="white">
-          <h5 className="grey-text text-darken-3">Sign In</h5>
-          <div className="input-field">
-            <label htmlFor="email">email</label>
-            <input
-              type="email"
-              id="email"
-              onChange={this.handleChange}
-              required
-            />
-          </div>
-          <div className="input-field">
-            <label htmlFor="password">password</label>
-            <input
-              type="password"
-              id="password"
-              onChange={this.handleChange}
-              required
-            />
-          </div>
-          <div className="input-field">
-            <button className="btn pink lighten-1 z-depth-0">Log In</button>
-            <div className="red-text center">
-              {authError ? <p>{authError}</p> : null}
+      <div className="most-height valign-wrapper">
+        <div className="container">
+          <form onSubmit={this.handleSubmit} className="white">
+            <h5 className="grey-text text-darken-3">Sign In</h5>
+            <div className="input-field">
+              <label htmlFor="email">email</label>
+              <input
+                type="email"
+                id="email"
+                onChange={this.handleChange}
+                required
+              />
             </div>
-          </div>
-        </form>
+            <div className="input-field">
+              <label htmlFor="password">password</label>
+              <input
+                type="password"
+                id="password"
+                onChange={this.handleChange}
+                required
+              />
+            </div>
+            <div className="input-field">
+              <button className="btn pink lighten-1 z-depth-0">Log In</button>
+              <div className="red-text center">
+                {authError ? <p>{authError}</p> : null}
+              </div>
+            </div>
+          </form>
+        </div>
       </div>
     );
   }

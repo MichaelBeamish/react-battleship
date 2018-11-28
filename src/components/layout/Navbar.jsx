@@ -15,7 +15,7 @@ const Navbar = props => {
   );
   return (
     <div className="my-nav">
-      <nav className="nav-wrapper orange">
+      <nav className="nav-wrapper">
         <div className="my-nav">
           <NavLink to="/" className="brand-logo left nav-header">
             Battleship

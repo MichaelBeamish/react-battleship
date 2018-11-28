@@ -103,17 +103,17 @@ class GamePlay extends Component {
     return (
       <div className="full-height">
         <div className="row height-100">
-          <div className="col l2 center height-100 blue">
+          <div className="col l2 center height-100">
             <div className="center">
-              <h3>GAME</h3>
+              <h5>*GAME</h5>
               <h5>Whos turn is it?</h5>
               <p>*PLAYER</p>
               <h5>SHIPS SUNK:</h5>
               <p>*SHIPS</p>
             </div>
           </div>
-          <div className="col l5 center height-100 grey darken-2">
-            <div className="center">
+          <div className="col l5 height-100">
+            <div className="left">
               <h3>Your Board</h3>
               <Grid typeOfGrid={"gamePlay"} blockClicked={null} />
               {this.state.updated === true ? (
@@ -121,9 +121,9 @@ class GamePlay extends Component {
               ) : null}
             </div>
           </div>
-          <div className="col l5 center height-100 blue">
-            <div className="center">
-              <h3>Other Board</h3>
+          <div className="col l5 height-100">
+            <div className="left">
+              <h3>*Other Board</h3>
               <Grid
                 typeOfGrid={"otherPlayer"}
                 blockClicked={this.blockClicked}

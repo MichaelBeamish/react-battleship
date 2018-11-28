@@ -26,7 +26,8 @@ class PlayerSetup extends Component {
       name: "aircraft carrier",
       acronym: "AC",
       color: "red",
-      occupiedBlocks: []
+      occupiedBlocks: [],
+      size: 5
     },
     BS: {
       location: null,
@@ -34,7 +35,8 @@ class PlayerSetup extends Component {
       name: "battleship",
       acronym: "BS",
       color: "orange",
-      occupiedBlocks: []
+      occupiedBlocks: [],
+      size: 4
     },
     SM: {
       location: null,
@@ -42,7 +44,8 @@ class PlayerSetup extends Component {
       name: "submarine",
       acronym: "SM",
       color: "green",
-      occupiedBlocks: []
+      occupiedBlocks: [],
+      size: 3
     },
     DS: {
       location: null,
@@ -50,7 +53,8 @@ class PlayerSetup extends Component {
       name: "destroyer",
       acronym: "DS",
       color: "purple",
-      occupiedBlocks: []
+      occupiedBlocks: [],
+      size: 3
     },
     CR: {
       location: null,
@@ -58,7 +62,8 @@ class PlayerSetup extends Component {
       name: "cruiser",
       acronym: "CR",
       color: "blue",
-      occupiedBlocks: []
+      occupiedBlocks: [],
+      size: 2
     }
   };
 
@@ -222,6 +227,7 @@ class PlayerSetup extends Component {
             name: shipName,
             acronym: this.state[shipAcronym].acronym,
             color: this.state[shipAcronym].color,
+            size: this.state[shipAcronym].size,
             occupiedBlocks: requiredBlocks
           },
           allOccupiedBlocks: newAllUsedBlocks,
@@ -261,10 +267,15 @@ class PlayerSetup extends Component {
 
     return (
       <div className="full-height">
-        <div className="row height-100">
-          <div className="col l4 center height-100 grey darken-2">
+        <div className="row height-100 container">
+          <div className="col l4 center height-100">
+            <h3>Your Ships</h3>
+            <span className="left">(1) Click a ship to select it.</span>
+            <br />
+            <span className="left">(2) Choose vertical or horizontal.</span>
+            <br />
+            <span className="left">(3) Click a block to place it.</span>
             <div className="ships center">
-              <h3>Your Ships</h3>
               <ShipsButtons
                 allShips={{
                   [this.state.AC.acronym]: this.state.AC,
@@ -276,21 +287,22 @@ class PlayerSetup extends Component {
                 handleShipClick={this.handleShipClick}
               />
             </div>
-            <div className="horizOrVert center">
-              <button
-                onClick={this.horizontalClicked}
-                className={`btn orient-btn grey ${"hbtn" +
-                  this.state.orientation}`}
-              >
-                Horizontal
-              </button>
-              <button
-                onClick={this.verticalClicked}
-                className={`btn orient-btn grey ${"vbtn" +
-                  this.state.orientation}`}
-              >
-                Vertical
-              </button>
+            <div className="horizOrVert">
+              {this.state.orientation === "horizontal" ? (
+                <button
+                  onClick={this.verticalClicked}
+                  className={`btn hz-btn ${"hbtn" + this.state.orientation}`}
+                >
+                  Horizontal
+                </button>
+              ) : (
+                <button
+                  onClick={this.horizontalClicked}
+                  className={`btn vt-btn ${"vbtn" + this.state.orientation}`}
+                >
+                  Vertical
+                </button>
+              )}
             </div>
             <div className="directions">
               <p>
@@ -352,15 +364,15 @@ class PlayerSetup extends Component {
             )}
             <Ships
               allShips={{
-                [this.state.AC.acronym]: this.state.AC,
-                [this.state.BS.acronym]: this.state.BS,
-                [this.state.SM.acronym]: this.state.SM,
-                [this.state.DS.acronym]: this.state.DS,
-                [this.state.CR.acronym]: this.state.CR
+                AC: this.state.AC,
+                BS: this.state.BS,
+                SM: this.state.SM,
+                DS: this.state.DS,
+                CR: this.state.CR
               }}
             />
           </div>
-          <div className="col l8 center blue height-100">
+          <div className="col l8 center height-100">
             <h3>Set Up Your Board</h3>
             <Grid typeOfGrid={"playerSetup"} blockClicked={this.blockClicked} />
           </div>
