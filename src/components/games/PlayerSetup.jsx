@@ -212,6 +212,16 @@ class PlayerSetup extends Component {
         newAllUsedBlocks.push(block);
       });
 
+      //Find next ship.
+      let allOptions = ["AC", "BS", "SM", "DS", "CR"];
+      let currentIndex = allOptions.indexOf(this.state.shipClicked);
+      let nextShip;
+      if (currentIndex === 4) {
+        nextShip = allOptions[0];
+      } else {
+        nextShip = allOptions[currentIndex + 1];
+      }
+
       //IF EVERYTHING IS OK CHANGE THE STATE:
       if (okToGo) {
         if (newAllUsedBlocks.length === 17) {
@@ -231,7 +241,8 @@ class PlayerSetup extends Component {
             occupiedBlocks: requiredBlocks
           },
           allOccupiedBlocks: newAllUsedBlocks,
-          messageToUser: ""
+          messageToUser: "",
+          shipClicked: nextShip
         });
       } else {
         this.setState({
@@ -267,114 +278,146 @@ class PlayerSetup extends Component {
 
     return (
       <div className="full-height">
-        <div className="row height-100 container">
-          <div className="col l4 center height-100">
-            <h3>Your Ships</h3>
-            <span className="left">(1) Click a ship to select it.</span>
-            <br />
-            <span className="left">(2) Choose vertical or horizontal.</span>
-            <br />
-            <span className="left">(3) Click a block to place it.</span>
-            <div className="ships center">
-              <ShipsButtons
-                allShips={{
-                  [this.state.AC.acronym]: this.state.AC,
-                  [this.state.BS.acronym]: this.state.BS,
-                  [this.state.SM.acronym]: this.state.SM,
-                  [this.state.DS.acronym]: this.state.DS,
-                  [this.state.CR.acronym]: this.state.CR
-                }}
-                handleShipClick={this.handleShipClick}
-              />
-            </div>
-            <div className="horizOrVert">
-              {this.state.orientation === "horizontal" ? (
-                <button
-                  onClick={this.verticalClicked}
-                  className={`btn hz-btn ${"hbtn" + this.state.orientation}`}
-                >
-                  Horizontal
-                </button>
-              ) : (
-                <button
-                  onClick={this.horizontalClicked}
-                  className={`btn vt-btn ${"vbtn" + this.state.orientation}`}
-                >
-                  Vertical
-                </button>
-              )}
+        <div className="row height-100">
+          <div className="col l3 height-100">
+            <div className="what-to-do">
+              <h3>What to do:</h3>
+              <h6>(1) Click a ship to select it. (right side)</h6>
+              <h6>(2) Choose orientation. (vertical or horizontal)</h6>
+              <h6>(3) Select a grid-block to place it on.</h6>
+              <h6>(4) Place all five ships.</h6>
+              <h6>(5) Click the finalize button.</h6>
             </div>
             <div className="directions">
-              <p>
-                Click a square to place the{" "}
-                <b
-                  className={`${this.state[this.state.shipClicked].color +
-                    "-text"} clicked-ship`}
-                >
-                  {this.state[this.state.shipClicked].name.toUpperCase()}
-                </b>
+              <h4>Selected:</h4>
+              <div className="selected-ship center">
                 {this.state.orientation === "horizontal" ? (
-                  <span>
-                    {" "}
-                    <u>HORIZONTALLY</u>.
-                  </span>
+                  <button
+                    className={`${this.state.shipClicked +
+                      "ship-width"} ship-buttons ${
+                      this.state[this.state.shipClicked].color
+                    }`}
+                  >
+                    {this.state[this.state.shipClicked].name.toUpperCase()}
+                  </button>
                 ) : (
-                  <span>
-                    {" "}
-                    <u>VERTICALLY</u>.
-                  </span>
+                  <button
+                    className={`${this.state.shipClicked +
+                      "ship-width"} ship-buttons right-90 ${
+                      this.state[this.state.shipClicked].color
+                    }`}
+                  >
+                    {this.state[this.state.shipClicked].name.toUpperCase()}
+                  </button>
                 )}
-              </p>
+              </div>
+
               {this.state.messageToUser ? (
-                <div className="row width-100 messages-display">
+                <div className="row messages-display">
                   <div className="col l2">
-                    <b className="red-text inline">*NOTE*</b>
+                    <h5 className="red-text center">
+                      <b>NOTE:</b>
+                    </h5>
                   </div>
-                  <div className="col l8 white-text">
-                    {this.state.messageToUser}
-                  </div>
-                  <div className="col l2">
-                    <b className="red-text">*NOTE*</b>
+                  <div className="col l10 white-text">
+                    <h6>{this.state.messageToUser}</h6>
                   </div>
                 </div>
               ) : null}
             </div>
-            {this.state.haveAllShipsBeenPlaced ? (
-              <button
-                onClick={() =>
-                  this.handleFinalize(gameID, game, thisPlayer, [
-                    this.state.AC,
-                    this.state.BS,
-                    this.state.SM,
-                    this.state.DS,
-                    this.state.CR
-                  ])
-                }
-                className="btn submit-button yellow darken-2 black-text"
-              >
-                Finalize
-              </button>
-            ) : (
-              <button
-                onClick={() => this.handleFinalize()}
-                className="btn grey"
-              >
-                Finalize
-              </button>
-            )}
-            <Ships
-              allShips={{
-                AC: this.state.AC,
-                BS: this.state.BS,
-                SM: this.state.SM,
-                DS: this.state.DS,
-                CR: this.state.CR
-              }}
-            />
           </div>
-          <div className="col l8 center height-100">
+          <div className="col l6 center height-100">
             <h3>Set Up Your Board</h3>
             <Grid typeOfGrid={"playerSetup"} blockClicked={this.blockClicked} />
+          </div>
+          <div className="col l3 height-100">
+            <div className="right-col">
+              <div className="h-v-button-container">
+                {this.state.orientation === "horizontal" ? (
+                  <div className="center">
+                    <button
+                      className="btn black hz-btn"
+                      onClick={this.verticalClicked}
+                    >
+                      Horizontal
+                    </button>
+                  </div>
+                ) : (
+                  <div className="center">
+                    <button
+                      className="btn black vt-btn"
+                      onClick={this.horizontalClicked}
+                    >
+                      Vertical
+                    </button>
+                  </div>
+                )}
+              </div>
+              <div className="ships center">
+                {this.state.orientation === "horizontal" ? (
+                  <div className="shps-hz">
+                    <ShipsButtons
+                      allShips={{
+                        [this.state.AC.acronym]: this.state.AC,
+                        [this.state.BS.acronym]: this.state.BS,
+                        [this.state.SM.acronym]: this.state.SM,
+                        [this.state.DS.acronym]: this.state.DS,
+                        [this.state.CR.acronym]: this.state.CR
+                      }}
+                      handleShipClick={this.handleShipClick}
+                    />
+                  </div>
+                ) : (
+                  <div className="shps-vt">
+                    <ShipsButtons
+                      allShips={{
+                        [this.state.AC.acronym]: this.state.AC,
+                        [this.state.BS.acronym]: this.state.BS,
+                        [this.state.SM.acronym]: this.state.SM,
+                        [this.state.DS.acronym]: this.state.DS,
+                        [this.state.CR.acronym]: this.state.CR
+                      }}
+                      handleShipClick={this.handleShipClick}
+                    />
+                  </div>
+                )}
+              </div>
+              <div className="finalize-container center">
+                {this.state.haveAllShipsBeenPlaced ? (
+                  <button
+                    onClick={() =>
+                      this.handleFinalize(gameID, game, thisPlayer, [
+                        this.state.AC,
+                        this.state.BS,
+                        this.state.SM,
+                        this.state.DS,
+                        this.state.CR
+                      ])
+                    }
+                    className="btn submit-button yellow darken-2 black-text"
+                  >
+                    Finalize
+                  </button>
+                ) : (
+                  <button
+                    onClick={() => this.handleFinalize()}
+                    className="btn grey"
+                  >
+                    Finalize
+                  </button>
+                )}
+              </div>
+              <Ships
+                allShips={{
+                  AC: this.state.AC,
+                  BS: this.state.BS,
+                  SM: this.state.SM,
+                  DS: this.state.DS,
+                  CR: this.state.CR
+                }}
+                who={"me"}
+              />
+            </div>
           </div>
         </div>
       </div>

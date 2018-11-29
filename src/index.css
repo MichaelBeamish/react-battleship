@@ -182,6 +182,17 @@ nav {
   height: 10.15em;
   width: 5em;
 }
+
+.pin {
+  width: 2.5em;
+  height: 2.5em;
+  margin-left: 1.25em;
+  margin-top: 1.25em;
+  border: 2px;
+  border-style: solid;
+  border-radius: 50%;
+}
+
 .hbtnhorizontal {
   background-color: black !important;
 }
@@ -227,17 +238,29 @@ nav {
 }
 
 .hz-btn {
-  width: 30%;
-  margin-top: 1em;
-  margin-bottom: 0.5em;
-  display: inline-block;
+  margin-top: 6em;
+  width: 12em;
+  z-index: +1;
+  position: relative;
 }
 .vt-btn {
-  width: 30%;
-  display: inline-block;
-  margin-top: 4em;
-  margin-bottom: 3em;
+  margin-top: 6em;
+  width: 12em;
   transform: rotate(90deg);
+  z-index: +1;
+  position: relative;
+}
+.right-col {
+  margin-top: 4em;
+  margin-right: 6em;
+}
+.shps-vt {
+  transform: rotate(90deg);
+}
+.finalize-container {
+  margin-top: 4em;
+  z-index: +1;
+  position: relative;
 }
 .submit-button {
   font-weight: 500;
@@ -269,11 +292,58 @@ nav {
 }
 
 .messages-display {
+  margin-top: 4em;
   background-color: black;
+  padding-bottom: 0.5em;
+  border: 3px;
+  border-style: dashed;
+  border-color: red;
   border-radius: 10px;
-  padding: 5px;
-  padding-right: 12px;
+}
+
+.player-name-bar {
+  margin-top: 2em;
+  margin-bottom: 0.25em;
+  padding: 0.25em;
+  display: inline-block;
   border: 2px;
   border-style: solid;
-  border-color: gold;
+  border-radius: 5px;
+}
+.small-player-name-bar {
+  margin: 0.25em;
+  padding: 0.25em;
+  display: inline-block;
+  border: 2px;
+  border-style: solid;
+  border-radius: 3px;
+}
+
+.make-inline {
+  display: inline;
+}
+
+.what-to-do {
+  margin-top: 1em;
+  margin-left: 1em;
+}
+
+.directions {
+  width: 114%;
+  margin-left: 1em;
+  margin-top: 1.5em;
+}
+
+.right-90 {
+  transform: rotate(90deg);
+}
+
+.selected-ship {
+  margin-top: 10em;
+  margin-bottom: 15em;
+}
+
+.game-info {
+  margin-left: 1em;
+  margin-top: 2em;
 }

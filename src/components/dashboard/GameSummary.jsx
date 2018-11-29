@@ -6,6 +6,7 @@ import moment from "moment";
 const GameSummary = ({ game, id }) => {
   let thisPlayer = game.players.filter(player => player.userReference === id);
   let otherPlayer = game.players.filter(player => player.userReference !== id);
+  //GENERATE DATE/TIME:
   let utcSeconds = game.createdAt.seconds;
   let utcMilliseconds = game.createdAt.nanoseconds / 1000000;
   let date = new Date(0);

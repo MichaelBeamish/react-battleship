@@ -1,5 +1,7 @@
 export const FINALIZE_GAME = "FINALIZE_GAME";
 export const FINALIZE_GAME_ERROR = "FINALIZE_GAME_ERROR";
+export const GUESS = "GUESS";
+export const GUESS_ERROR = "GUESS_ERROR";
 export const GENERATE_GAME = "GENERATE_GAME";
 export const GENERATE_GAME_ERROR = "GENERATE_GAME_ERROR";
 export const CREATED_GAME_TO_NULL = "CREATED_GAME_TO_NULL";
@@ -7,6 +9,43 @@ export const CREATED_GAME_TO_NULL = "CREATED_GAME_TO_NULL";
 export const createdToNull = () => {
   return {
     type: CREATED_GAME_TO_NULL
+  };
+};
+
+export const submitGuess = (
+  gameID,
+  deliveredGame,
+  playerID,
+  guessedBlocksUpdated
+) => {
+  return (dispatch, getState, { getFirebase, getFirestore }) => {
+    let game = JSON.parse(JSON.stringify(deliveredGame));
+    let allPlayers = game.players;
+
+    let nextPlayer;
+    if (playerID === 0) {
+      nextPlayer = 1;
+    } else {
+      nextPlayer = 0;
+    }
+
+    allPlayers[playerID].guessedBlocks = guessedBlocksUpdated;
+
+    const firestore = getFirestore();
+    firestore
+      .collection("games")
+      .doc(gameID)
+      .update({
+        players: allPlayers,
+        whosTurn: nextPlayer
+      })
+      .then(() => {
+        //Then resumes the dispatch.
+        dispatch({ type: GUESS, payload: gameID });
+      })
+      .catch(err => {
+        dispatch({ type: GUESS_ERROR, payload: err });
+      });
   };
 };
 
@@ -46,7 +85,8 @@ export const generateGame = (receivedPlayers, gameName) => {
       id: 0,
       userReference: receivedPlayers[0],
       winner: false,
-      setUpBoard: false
+      setUpBoard: false,
+      guessedBlocks: { AC: [], BS: [], SM: [], DS: [], CR: [], MISSES: [] }
     };
     players.push(player1);
 
@@ -54,7 +94,8 @@ export const generateGame = (receivedPlayers, gameName) => {
       id: 1,
       userReference: receivedPlayers[1],
       winner: false,
-      setUpBoard: false
+      setUpBoard: false,
+      guessedBlocks: { AC: [], BS: [], SM: [], DS: [], CR: [], MISSES: [] }
     };
     players.push(player2);
 

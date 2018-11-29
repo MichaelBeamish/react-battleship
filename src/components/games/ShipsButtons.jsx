@@ -3,10 +3,9 @@ import React from "react";
 const ShipsButtons = ({ allShips, handleShipClick }) => {
   let shipsAbbreviated = ["AC", "BS", "SM", "DS", "CR"];
   let buttonList = shipsAbbreviated.map(ship => (
-    <div>
+    <div key={ship}>
       <button
         id={ship}
-        key={ship}
         onClick={() => handleShipClick(ship)}
         className={`btn ${ship + "ship-width"} ship-buttons ${
           allShips[ship].color
