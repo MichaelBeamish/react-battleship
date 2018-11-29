@@ -71,7 +71,7 @@ class GamePlay extends Component {
 
             //UPDATE DATABASE WITH GUESS (weather or not it hit):
             //IF ALL SHIPS HIT RUN END GAME LOGIC:
-            if (countShipsHit === 4) {
+            if (countShipsHit === 17) {
               console.log("GAME OVER:");
               console.log(thisPlayerInfo.nickname, "won!");
               this.props.gameOver(
