@@ -328,7 +328,21 @@ class PlayerSetup extends Component {
           </div>
           <div className="col l6 center height-100">
             <h3>Set Up Your Board</h3>
-            <Grid typeOfGrid={"playerSetup"} blockClicked={this.blockClicked} />
+            {this.state.orientation === "horizontal" ? (
+              <div className="right-cursor">
+                <Grid
+                  typeOfGrid={"playerSetup"}
+                  blockClicked={this.blockClicked}
+                />
+              </div>
+            ) : (
+              <div className="down-cursor">
+                <Grid
+                  typeOfGrid={"playerSetup"}
+                  blockClicked={this.blockClicked}
+                />
+              </div>
+            )}
           </div>
           <div className="col l3 height-100">
             <div className="right-col">

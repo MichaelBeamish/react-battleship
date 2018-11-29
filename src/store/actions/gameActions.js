@@ -2,6 +2,8 @@ export const FINALIZE_GAME = "FINALIZE_GAME";
 export const FINALIZE_GAME_ERROR = "FINALIZE_GAME_ERROR";
 export const GUESS = "GUESS";
 export const GUESS_ERROR = "GUESS_ERROR";
+export const GAME_OVER = "GUESS";
+export const GAME_OVER_ERROR = "GUESS_ERROR";
 export const GENERATE_GAME = "GENERATE_GAME";
 export const GENERATE_GAME_ERROR = "GENERATE_GAME_ERROR";
 export const CREATED_GAME_TO_NULL = "CREATED_GAME_TO_NULL";
@@ -9,6 +11,45 @@ export const CREATED_GAME_TO_NULL = "CREATED_GAME_TO_NULL";
 export const createdToNull = () => {
   return {
     type: CREATED_GAME_TO_NULL
+  };
+};
+
+export const gameOver = (
+  gameID,
+  deliveredGame,
+  playerID,
+  guessedBlocksUpdated
+) => {
+  return (dispatch, getState, { getFirebase, getFirestore }) => {
+    let game = JSON.parse(JSON.stringify(deliveredGame));
+    let allPlayers = game.players;
+    let thisPlayer = allPlayers.filter(player => player.id === playerID);
+    thisPlayer = thisPlayer[0];
+    let otherPlayer = allPlayers.filter(player => player.id !== playerID);
+    otherPlayer = otherPlayer[0];
+
+    //CHANGE STUFF
+    thisPlayer.winner = true;
+    thisPlayer.guessedBlocks = guessedBlocksUpdated;
+
+    allPlayers = [thisPlayer, otherPlayer];
+
+    const firestore = getFirestore();
+    firestore
+      .collection("games")
+      .doc(gameID)
+      .update({
+        players: allPlayers,
+        status: "gameOver",
+        winner: playerID
+      })
+      .then(() => {
+        //Then resumes the dispatch.
+        dispatch({ type: GAME_OVER, payload: gameID });
+      })
+      .catch(err => {
+        dispatch({ type: GAME_OVER_ERROR, payload: err });
+      });
   };
 };
 
@@ -21,6 +62,10 @@ export const submitGuess = (
   return (dispatch, getState, { getFirebase, getFirestore }) => {
     let game = JSON.parse(JSON.stringify(deliveredGame));
     let allPlayers = game.players;
+    let thisPlayer = allPlayers.filter(player => player.id === playerID);
+    thisPlayer = thisPlayer[0];
+    let otherPlayer = allPlayers.filter(player => player.id !== playerID);
+    otherPlayer = otherPlayer[0];
 
     let nextPlayer;
     if (playerID === 0) {
@@ -29,7 +74,9 @@ export const submitGuess = (
       nextPlayer = 0;
     }
 
-    allPlayers[playerID].guessedBlocks = guessedBlocksUpdated;
+    thisPlayer.guessedBlocks = guessedBlocksUpdated;
+
+    allPlayers = [thisPlayer, otherPlayer];
 
     const firestore = getFirestore();
     firestore
@@ -54,8 +101,15 @@ export const finalizePlayerGrid = (gameID, deliveredGame, player, ships) => {
     let game = JSON.parse(JSON.stringify(deliveredGame));
     let thisPlayerID = player.id;
     let allPlayers = game.players;
-    allPlayers[thisPlayerID].setUpBoard = true;
-    allPlayers[thisPlayerID].ships = ships;
+    let thisPlayer = allPlayers.filter(player => player.id === thisPlayerID);
+    thisPlayer = thisPlayer[0];
+    let otherPlayer = allPlayers.filter(player => player.id !== thisPlayerID);
+    otherPlayer = otherPlayer[0];
+
+    thisPlayer.setUpBoard = true;
+    thisPlayer.ships = ships;
+
+    allPlayers = [thisPlayer, otherPlayer];
 
     const firestore = getFirestore();
     firestore

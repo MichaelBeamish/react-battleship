@@ -14,11 +14,14 @@ import Pins from "./Pins";
 
 // ACTIONS:
 import { submitGuess } from "../../store/actions/gameActions";
+import { gameOver } from "../../store/actions/gameActions";
 
 class GamePlay extends Component {
   state = {
     propsLoaded: false,
-    updated: false
+    updated: false,
+    messageToUser: null,
+    yourTurnArrived: false
   };
 
   blockClicked = numLetter => {
@@ -28,58 +31,112 @@ class GamePlay extends Component {
     let guess = numLetter;
     let thisID = this.props.thisPlayer.id;
     let turn = this.props.game.whosTurn;
+    let thisPlayerInfo = this.props.thisPlayerInfo;
     let otherPlayer = this.props.otherPlayer;
 
-    // guessedBlocks: { AC: [], BS: [], SM: [], DS: [], CR: [], MISSES: [] }
-
-    if (thisID === turn) {
-      if (otherPlayer.setUpBoard === true) {
-        //CHECK IF ALREADY GUESSED:
-        let alreadyChecked = false;
-        let thingsToCheck = ["AC", "BS", "SM", "DS", "CR", "MISSES"];
-        thingsToCheck.forEach(thing => {
-          existingGuesses[thing].forEach(priorGuess => {
-            if (priorGuess === guess) {
-              alreadyChecked = true;
-            }
-          });
-        });
-        //IF NOT ALREADY GUESSED:
-        if (alreadyChecked === false) {
-          let hit = false;
-          otherPlayer.ships.forEach(ship => {
-            ship.occupiedBlocks.forEach(block => {
-              if (block === guess) {
-                hit = true;
-                existingGuesses[ship.acronym].push(block); //HIT
-                console.log("hit", guess);
+    if (this.props.game.status === "inProgress") {
+      if (thisID === turn) {
+        if (otherPlayer.setUpBoard === true) {
+          //CHECK IF ALREADY GUESSED:
+          let alreadyChecked = false;
+          let thingsToCheck = ["AC", "BS", "SM", "DS", "CR", "MISSES"];
+          let countShipsHit = 0;
+          thingsToCheck.forEach(thing => {
+            existingGuesses[thing].forEach(priorGuess => {
+              if (priorGuess === guess) {
+                alreadyChecked = true;
+              }
+              if (thing !== "MISSES") {
+                countShipsHit++;
               }
             });
           });
-          if (hit !== true) {
-            existingGuesses.MISSES.push(guess); //MISS
-            console.log("missed", guess);
+          //IF NOT ALREADY GUESSED:
+          if (alreadyChecked === false) {
+            let hit = false;
+            otherPlayer.ships.forEach(ship => {
+              ship.occupiedBlocks.forEach(block => {
+                if (block === guess) {
+                  countShipsHit++;
+                  hit = true;
+                  existingGuesses[ship.acronym].push(block); //HIT
+                  console.log("hit", guess);
+                }
+              });
+            });
+            if (hit !== true) {
+              existingGuesses.MISSES.push(guess); //MISS
+              console.log("missed", guess);
+            }
+
+            //UPDATE DATABASE WITH GUESS (weather or not it hit):
+            //IF ALL SHIPS HIT RUN END GAME LOGIC:
+            if (countShipsHit === 4) {
+              console.log("GAME OVER:");
+              console.log(thisPlayerInfo.nickname, "won!");
+              this.props.gameOver(
+                this.props.gameID,
+                this.props.game,
+                this.props.thisPlayer.id,
+                existingGuesses
+              );
+            } else {
+              //OTHERWISE JUST UPDATE THE DATABASAE AS NORMAL:
+              this.props.submitGuess(
+                this.props.gameID,
+                this.props.game,
+                this.props.thisPlayer.id,
+                existingGuesses
+              );
+            }
+            this.setState({
+              messageToUser: null,
+              yourTurnArrived: false
+            });
+          } else {
+            this.setState({
+              messageToUser: `Already guessed '${guess}'.`
+            });
           }
-          //UPDATE DATABASE WITH GUESS (weather or not it hit):
-          this.props.submitGuess(
-            this.props.gameID,
-            this.props.game,
-            this.props.thisPlayer.id,
-            existingGuesses
-          );
         } else {
-          console.log("already guessed", guess);
+          console.log("Other player is setting up their board.");
         }
       } else {
-        console.log("the other player isn't set up yet");
+        this.setState({
+          messageToUser: "It's not your turn."
+        });
       }
     } else {
-      console.log("its the other players turn");
+      console.log("Can't click when the game is over.");
     }
   };
 
   componentDidUpdate() {
     if (this.state.propsLoaded === true) {
+      if (this.props.game.whosTurn === this.props.thisPlayer.id) {
+        if (this.state.yourTurnArrived === false) {
+          this.setState({
+            yourTurnArrived: true,
+            messageToUser: null
+          });
+        }
+      } else {
+        if (this.state.yourTurnArrived === true) {
+          this.setState({
+            yourTurnArrived: false,
+            messageToUser: null
+          });
+        }
+      }
+
+      if (this.props.game.status === "gameOver") {
+        if (this.state.messageToUser) {
+          this.setState({
+            messageToUser: null
+          });
+        }
+      }
+
       if (this.state.updated === false) {
         this.setState({
           updated: true
@@ -155,6 +212,9 @@ class GamePlay extends Component {
       if (allGuesses.CR.length === 2) {
         sunkShips.push("CR");
       }
+      if (game.status === "gameOver") {
+        sunkShips = ["AC", "BS", "SM", "DS", "CR"];
+      }
 
       //HIT AND MISS PINS:
       let thingsThatAreHits = ["AC", "BS", "SM", "DS", "CR"];
@@ -181,60 +241,131 @@ class GamePlay extends Component {
         othersMissPins.push(miss);
       });
 
+      let otherPlayerSettingUp = null;
+      if (otherPlayer.setUpBoard === false) {
+        otherPlayerSettingUp = `Waiting for ${
+          otherPlayerInfo.nickname
+        } to finish
+          setting up their board.`;
+      }
+
       return (
         <div className="full-height">
           <div className="row height-100">
             <div className="col l2 height-100">
               <div className="game-info">
-                <h4>{game.gameName}</h4>
-                <p>Started: {moment(date).calendar()}</p>
-                <div />
-                <h5>Whos Turn:</h5>
-                {game.whosTurn === thisPlayer.id ? (
+                <div className="title-date">
+                  <h4>{game.gameName.toUpperCase()}</h4>
+                  <p>Started: {moment(date).calendar()}</p>
+                </div>
+                {game.status === "inProgress" ? (
                   <div>
-                    {thisPlayer.id === 0 ? (
-                      <div className="red small-player-name-bar">
-                        <h5 className="make-inline">
-                          {thisPlayerInfo.nickname}
-                        </h5>
-                        <p className="make-inline"> (yours)</p>
+                    {!otherPlayerSettingUp ? (
+                      <div>
+                        <h5>Whos Turn:</h5>
+                        {game.whosTurn === thisPlayer.id ? (
+                          <div>
+                            {thisPlayer.id === 0 ? (
+                              <div className="red small-player-name-bar">
+                                <h5 className="make-inline">
+                                  {thisPlayerInfo.nickname}
+                                </h5>
+                                <p className="make-inline"> (yours)</p>
+                              </div>
+                            ) : (
+                              <div className="blue small-player-name-bar">
+                                <h5 className="make-inline">
+                                  {thisPlayerInfo.nickname}
+                                </h5>
+                                <p className="make-inline"> (yours)</p>
+                              </div>
+                            )}
+                          </div>
+                        ) : (
+                          <div>
+                            {thisPlayer.id === 0 ? (
+                              <div className="blue small-player-name-bar">
+                                <h5 className="make-inline">
+                                  {otherPlayerInfo.nickname}
+                                </h5>
+                              </div>
+                            ) : (
+                              <div className="red small-player-name-bar">
+                                <h5 className="make-inline">
+                                  {otherPlayerInfo.nickname}
+                                </h5>
+                              </div>
+                            )}
+                          </div>
+                        )}
                       </div>
-                    ) : (
-                      <div className="blue small-player-name-bar">
-                        <h5 className="make-inline">
-                          {thisPlayerInfo.nickname}
-                        </h5>
-                        <p className="make-inline"> (yours)</p>
-                      </div>
-                    )}
+                    ) : null}
                   </div>
                 ) : (
-                  <div>
-                    {thisPlayer.id === 0 ? (
-                      <div className="blue small-player-name-bar">
-                        <h5 className="make-inline">
-                          {otherPlayerInfo.nickname}
-                        </h5>
+                  <div className="center">
+                    <h3>Game Over!</h3>
+                    <h4>Champion:</h4>
+                    {game.winner === thisPlayer.id ? (
+                      <div>
+                        {thisPlayer.id === 0 ? (
+                          <h5 className="red small-player-name-bar">
+                            {thisPlayerInfo.nickname}
+                          </h5>
+                        ) : (
+                          <h5 className="blue small-player-name-bar">
+                            {thisPlayerInfo.nickname}
+                          </h5>
+                        )}
+                        <br />
+                        <img
+                          className="trophy-icon"
+                          src={"/images/champion.png"}
+                          alt="trophy-player-won"
+                        />
+                        <div>You are the winner!</div>
                       </div>
                     ) : (
-                      <div className="red small-player-name-bar">
-                        <h5 className="make-inline">
-                          {otherPlayerInfo.nickname}
-                        </h5>
+                      <div>
+                        {otherPlayer.id === 0 ? (
+                          <h5 className="red small-player-name-bar">
+                            {otherPlayerInfo.nickname}
+                          </h5>
+                        ) : (
+                          <h5 className="blue small-player-name-bar">
+                            {otherPlayerInfo.nickname}
+                          </h5>
+                        )}
+                        <br />
+                        <img
+                          className="skull-icon"
+                          src={"/images/skull.png"}
+                          alt="skull-player-lost"
+                        />
+                        <div>You lost!</div>
                       </div>
                     )}
                   </div>
                 )}
-                {otherPlayer.setUpBoard === false ? (
-                  <h6>
-                    *Waiting for {otherPlayerInfo.nickname} to finish setting up
-                    their board.
-                  </h6>
+                {otherPlayerSettingUp ? (
+                  <div className="row center small-messages-display">
+                    <h5 className="red-text">
+                      <b>NOTE:</b>
+                    </h5>
+                    <h6 className="white-text">{otherPlayerSettingUp}</h6>
+                  </div>
+                ) : null}
+                {this.state.messageToUser ? (
+                  <div className="row center small-messages-display">
+                    <h5 className="red-text">
+                      <b>NOTE:</b>
+                    </h5>
+                    <h6 className="white-text">{this.state.messageToUser}</h6>
+                  </div>
                 ) : null}
               </div>
             </div>
             <div className="col l5 height-100">
-              <div className="left">
+              <div className="name-icon-container">
                 {thisPlayer.id === 0 ? (
                   <div className="red player-name-bar">
                     <h3 className="make-inline">{thisPlayerInfo.nickname}</h3>
@@ -246,46 +377,55 @@ class GamePlay extends Component {
                     <h5 className="make-inline"> (you)</h5>
                   </div>
                 )}
-                <Grid typeOfGrid={"gamePlay"} blockClicked={null} />
-                {this.state.updated === true ? (
-                  <div>
-                    <Ships allShips={shipsFormated} who={"me"} />
-                    <Pins
-                      hits={othersHitPins}
-                      misses={othersMissPins}
-                      who={"other"}
-                    />
-                  </div>
-                ) : null}
               </div>
+              <Grid typeOfGrid={"gamePlay"} blockClicked={null} />
             </div>
             <div className="col l5 height-100">
-              <div className="left">
-                {thisPlayer.id === 0 ? (
-                  <div className="blue player-name-bar">
-                    <h3 className="make-inline">{otherPlayerInfo.nickname}</h3>
-                  </div>
-                ) : (
+              <div className="name-icon-container">
+                {otherPlayer.id === 0 ? (
                   <div className="red player-name-bar">
                     <h3 className="make-inline">{otherPlayerInfo.nickname}</h3>
                   </div>
+                ) : (
+                  <div className="blue player-name-bar">
+                    <h3 className="make-inline">{otherPlayerInfo.nickname}</h3>
+                  </div>
                 )}
-                <Grid
-                  typeOfGrid={"otherPlayer"}
-                  blockClicked={this.blockClicked}
+              </div>
+              {game.whosTurn === thisPlayer.id ? (
+                <div className="play-cursor">
+                  <Grid
+                    typeOfGrid={"otherPlayer"}
+                    blockClicked={this.blockClicked}
+                  />
+                </div>
+              ) : (
+                <div className="cant-cursor">
+                  <Grid
+                    typeOfGrid={"otherPlayer"}
+                    blockClicked={this.blockClicked}
+                  />
+                </div>
+              )}
+            </div>
+          </div>
+          <div id="ALL-SHIPS-AND-PINS">
+            {this.state.updated === true ? (
+              <div>
+                <Ships allShips={shipsFormated} who={"me"} />
+                <Pins
+                  hits={othersHitPins}
+                  misses={othersMissPins}
+                  who={"other"}
                 />
-                {this.state.updated === true ? (
-                  <div>
-                    <Ships
-                      allShips={otherShipsFormated}
-                      who={"other"}
-                      sunkShips={sunkShips}
-                    />
-                    <Pins hits={hitPins} misses={missPins} who={"me"} />
-                  </div>
-                ) : null}
+                <Ships
+                  allShips={otherShipsFormated}
+                  who={"other"}
+                  sunkShips={sunkShips}
+                />
+                <Pins hits={hitPins} misses={missPins} who={"me"} />
               </div>
-            </div>
+            ) : null}
           </div>
         </div>
       );
@@ -363,7 +503,7 @@ const mapStateToProps = (state, ownProps) => {
 export default compose(
   connect(
     mapStateToProps,
-    { submitGuess }
+    { submitGuess, gameOver }
   ),
   firestoreConnect([{ collection: "users" }, { collection: "games" }])
 )(GamePlay);

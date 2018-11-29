@@ -126,6 +126,20 @@ nav {
   justify-content: left;
   align-items: top;
 }
+
+.right-cursor {
+  cursor: e-resize;
+}
+.down-cursor {
+  cursor: s-resize;
+}
+.play-cursor {
+  cursor: cell;
+}
+.cant-cursor {
+  cursor: not-allowed;
+}
+
 .block-text {
   padding-left: 2px;
   pointer-events: none;
@@ -191,6 +205,7 @@ nav {
   border: 2px;
   border-style: solid;
   border-radius: 50%;
+  pointer-events: none;
 }
 
 .hbtnhorizontal {
@@ -301,10 +316,19 @@ nav {
   border-radius: 10px;
 }
 
+.small-messages-display {
+  margin-top: 1em;
+  background-color: black;
+  padding-bottom: 0.5em;
+  padding-left: 5px;
+  padding-right: 5px;
+  border: 3px;
+  border-style: dashed;
+  border-color: red;
+  border-radius: 10px;
+}
+
 .player-name-bar {
-  margin-top: 2em;
-  margin-bottom: 0.25em;
-  padding: 0.25em;
   display: inline-block;
   border: 2px;
   border-style: solid;
@@ -346,4 +370,34 @@ nav {
 .game-info {
   margin-left: 1em;
   margin-top: 2em;
+}
+
+.skull-icon {
+  margin-top: 2em;
+  height: 6em;
+  width: auto;
+}
+
+.trophy-icon {
+  margin-top: 2em;
+  height: 6em;
+  width: auto;
+}
+
+.name-icon-container {
+  margin-left: 1em;
+  margin-top: 2em;
+  margin-bottom: 1em;
+}
+
+.title-date {
+  background-color: lightslategray;
+  color: white;
+  margin-right: 2em;
+  padding: 0.1em;
+  text-align: center;
+  border: 2px;
+  border-style: solid;
+  border-radius: 5px;
+  border-color: black;
 }
