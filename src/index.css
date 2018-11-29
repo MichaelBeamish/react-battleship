@@ -7,6 +7,12 @@ body {
   background-color: lightseagreen;
 }
 
+.ship-img {
+  width: 50em;
+  border-radius: 20px;
+  border-style: solid;
+}
+
 form {
   margin: 2em;
   padding: 0.5em;
